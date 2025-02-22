@@ -3,6 +3,7 @@ import { useState } from 'react';
 import GameGrid from '@/components/GameGrid';
 import GameStats from '@/components/GameStats';
 import BetControls from '@/components/BetControls';
+import WalletButton from '@/components/WalletButton';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -64,7 +65,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-game-bg text-game-text p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8">Mines Game</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold">Mines Game</h1>
+          <WalletButton />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="flex flex-col gap-8">

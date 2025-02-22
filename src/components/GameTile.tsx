@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { bomb, check } from 'lucide-react';
+import { Bomb, Check } from 'lucide-react';
 
 interface GameTileProps {
   index: number;
@@ -28,9 +28,9 @@ const GameTile = ({ index, isMine, isRevealed, onReveal, disabled }: GameTilePro
       {isRevealed && (
         <div className="flex items-center justify-center w-full h-full">
           {isMine ? (
-            <bomb className="w-8 h-8 text-game-danger" />
+            <Bomb className="w-8 h-8 text-game-danger" />
           ) : (
-            <check className="w-8 h-8 text-game-success" />
+            <Check className="w-8 h-8 text-game-success" />
           )}
         </div>
       )}
