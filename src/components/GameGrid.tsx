@@ -16,34 +16,28 @@ const GameGrid = ({ onGameOver, isActive, onMultiplierChange }: GameGridProps) =
 
   useEffect(() => {
     if (isActive) {
-      // Place one mine randomly
+      // Reset game state when a new game starts
       const newTiles = Array(9).fill({ isMine: false, isRevealed: false });
-      const mineIndex = Math.floor(Math.random() * 9);
-      newTiles[mineIndex] = { ...newTiles[mineIndex], isMine: true };
       setTiles(newTiles);
       setRevealedCount(0);
     }
   }, [isActive]);
 
-  const handleReveal = (index: number) => {
+  const handleReveal = async (index: number) => {
     if (!isActive) return;
 
     const newTiles = [...tiles];
     newTiles[index] = { ...newTiles[index], isRevealed: true };
     setTiles(newTiles);
 
-    if (newTiles[index].isMine) {
-      onGameOver(false);
-    } else {
-      const newRevealedCount = revealedCount + 1;
-      setRevealedCount(newRevealedCount);
-      const newMultiplier = 1 + (newRevealedCount * 0.5);
-      onMultiplierChange(newMultiplier);
+    // Update game stats locally (will be overwritten by blockchain state)
+    const newRevealedCount = revealedCount + 1;
+    setRevealedCount(newRevealedCount);
+    const newMultiplier = 1 + (newRevealedCount * 0.5);
+    onMultiplierChange(newMultiplier);
 
-      if (newRevealedCount === 4) {
-        onGameOver(true);
-      }
-    }
+    // The actual game state will be managed by the smart contract
+    window.parent.postMessage({ type: 'REVEAL_TILE', index }, '*');
   };
 
   return (

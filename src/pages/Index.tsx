@@ -1,10 +1,17 @@
-
 import { useState } from 'react';
 import GameGrid from '@/components/GameGrid';
 import GameStats from '@/components/GameStats';
 import BetControls from '@/components/BetControls';
 import WalletButton from '@/components/WalletButton';
 import { useToast } from '@/hooks/use-toast';
+
+interface AptosWindow extends Window {
+  aptos?: any;
+}
+
+declare const window: AptosWindow;
+
+const SMART_CONTRACT_ADDRESS = "0x1"; // Replace with your deployed contract address
 
 const Index = () => {
   const [isActive, setIsActive] = useState(false);
@@ -13,36 +20,126 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handlePlaceBet = (amount: number) => {
-    setIsLoading(true);
-    // Simulating blockchain transaction
-    setTimeout(() => {
+  const handlePlaceBet = async (amount: number) => {
+    try {
+      if (!window.aptos) {
+        toast({
+          title: "Wallet Not Connected",
+          description: "Please connect your Petra Wallet first",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      const transaction = {
+        type: "entry_function_payload",
+        function: `${SMART_CONTRACT_ADDRESS}::mines::place_bet`,
+        arguments: [Math.floor(amount * 100000000)], // Convert APT to Octas
+        type_arguments: [],
+      };
+
+      const response = await window.aptos.signAndSubmitTransaction(transaction);
+      await window.aptos.waitForTransaction(response.hash);
+
       setBetAmount(amount);
       setIsActive(true);
       setMultiplier(1);
-      setIsLoading(false);
+      
       toast({
         title: "Bet placed successfully!",
         description: `${amount} APT has been placed.`,
       });
-    }, 1500);
+    } catch (error: any) {
+      console.error('Error placing bet:', error);
+      toast({
+        title: "Transaction Failed",
+        description: error.message || "Failed to place bet",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleCashOut = () => {
-    setIsLoading(true);
-    // Simulating blockchain transaction
-    setTimeout(() => {
+  const handleCashOut = async () => {
+    try {
+      if (!window.aptos) {
+        toast({
+          title: "Wallet Not Connected",
+          description: "Please connect your Petra Wallet first",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      const transaction = {
+        type: "entry_function_payload",
+        function: `${SMART_CONTRACT_ADDRESS}::mines::cash_out`,
+        arguments: [],
+        type_arguments: [],
+      };
+
+      const response = await window.aptos.signAndSubmitTransaction(transaction);
+      await window.aptos.waitForTransaction(response.hash);
+
       const winnings = betAmount * multiplier;
       setIsActive(false);
       setBetAmount(0);
       setMultiplier(1);
-      setIsLoading(false);
+
       toast({
         title: "Cash out successful!",
         description: `You won ${winnings.toFixed(2)} APT!`,
         variant: "default",
       });
-    }, 1500);
+    } catch (error: any) {
+      console.error('Error cashing out:', error);
+      toast({
+        title: "Transaction Failed",
+        description: error.message || "Failed to cash out",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRevealTile = async (index: number) => {
+    try {
+      if (!window.aptos) {
+        toast({
+          title: "Wallet Not Connected",
+          description: "Please connect your Petra Wallet first",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      const transaction = {
+        type: "entry_function_payload",
+        function: `${SMART_CONTRACT_ADDRESS}::mines::reveal_tile`,
+        arguments: [index],
+        type_arguments: [],
+      };
+
+      const response = await window.aptos.signAndSubmitTransaction(transaction);
+      await window.aptos.waitForTransaction(response.hash);
+
+      // The game state will be updated through the contract response
+      // For now, we'll keep the local state management for demo purposes
+    } catch (error: any) {
+      console.error('Error revealing tile:', error);
+      toast({
+        title: "Transaction Failed",
+        description: error.message || "Failed to reveal tile",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGameOver = (won: boolean) => {
